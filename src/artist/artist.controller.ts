@@ -24,14 +24,14 @@ export class ArtistController {
 
   @Get()
   @UseInterceptors(ClassSerializerInterceptor)
-  getUsers(): Artist[] {
-    return this.artistService.getUsers();
+  getArtists(): Artist[] {
+    return this.artistService.getArtists();
   }
 
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
-  getUser(@Param() { id }: IdParam): Artist {
-    const user = this.artistService.getUser(id);
+  getArtist(@Param() { id }: IdParam): Artist {
+    const user = this.artistService.getArtist(id);
     if (!user) {
       throw new NotFoundException(Messages.NotFound);
     }
@@ -40,7 +40,7 @@ export class ArtistController {
 
   @Post()
   @UseInterceptors(ClassSerializerInterceptor)
-  createUser(@Body(new ValidationPipe()) dto: CreateArtistDto): Artist {
+  createArtist(@Body(new ValidationPipe()) dto: CreateArtistDto): Artist {
     return this.artistService.createArtist(dto);
   }
 

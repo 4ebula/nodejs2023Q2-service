@@ -5,12 +5,15 @@ import { Artist } from './artist';
 import { ArtistData } from 'src/artist/models';
 import { Album } from './album';
 import { AlbumData } from 'src/album/models';
+import { Track } from './track';
+import { TrackData } from 'src/track/models';
 
 @Injectable()
 export class DB {
   private users: Map<string, User> = new Map();
   private artists: Map<string, Artist> = new Map();
   private albums: Map<string, Album> = new Map();
+  private tracks: Map<string, Track> = new Map();
 
   get user() {
     return {
@@ -73,6 +76,10 @@ export class DB {
           .filter((album) => album.artistId === id)
           .forEach((album) => album.updateArtist(null));
 
+        [...this.tracks.values()]
+          .filter((track) => track.artistId === id)
+          .forEach((track) => track.updateArtist(null));
+
         return artist;
       },
     };
@@ -101,7 +108,41 @@ export class DB {
         }
 
         this.albums.delete(id);
+        [...this.tracks.values()]
+          .filter((track) => track.albumId === id)
+          .forEach((track) => track.updateAlbum(null));
+
         return album;
+      },
+    };
+  }
+
+  get track() {
+    return {
+      findMany: (): Track[] => [...this.tracks.values()],
+      findUnique: (id: string): Track | undefined => this.tracks.get(id),
+      create: ({
+        data: { name, duration, artistId, albumId },
+      }: TrackData): Track | null => {
+        const track = new Track(name, duration, artistId, albumId);
+        this.tracks.set(track.id, track);
+        return track;
+      },
+      update: (
+        id: string,
+        { data: { name, duration, artistId, albumId } }: TrackData,
+      ): Track | null => {
+        const track = this.tracks.get(id);
+        return track.update(name, duration, artistId, albumId);
+      },
+      delete: (id: string): Track | null => {
+        const track = this.tracks.get(id);
+        if (!track) {
+          return null;
+        }
+
+        this.tracks.delete(id);
+        return track;
       },
     };
   }

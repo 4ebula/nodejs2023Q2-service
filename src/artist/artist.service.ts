@@ -7,11 +7,11 @@ import { CreateArtistDto, UpdateArtistdDto } from './models';
 export class ArtistService {
   constructor(private db: DB) {}
 
-  getUsers(): Artist[] {
+  getArtists(): Artist[] {
     return this.db.artist.findMany();
   }
 
-  getUser(id: string): Artist | null {
+  getArtist(id: string): Artist | null {
     return this.db.artist.findUnique(id) ?? null;
   }
 

@@ -12,26 +12,26 @@ import {
   NotFoundException,
   HttpCode,
 } from '@nestjs/common';
-import { AlbumService } from './album.service';
-import { Album } from 'src/db/album';
+import { TrackService } from './track.service';
+import { Track } from 'src/db/track';
 import { IdParam } from 'src/shared/models/shared.model';
 import { Messages } from './models/messages';
-import { CreateAlbumDto, UpdateAlbumdDto } from './models';
+import { CreateTrackDto, UpdateTrackdDto } from './models';
 
-@Controller('album')
-export class AlbumController {
-  constructor(private albumService: AlbumService) {}
+@Controller('track')
+export class TrackController {
+  constructor(private trackService: TrackService) {}
 
   @Get()
   @UseInterceptors(ClassSerializerInterceptor)
-  getAlbums(): Album[] {
-    return this.albumService.getAlbums();
+  getTracks(): Track[] {
+    return this.trackService.getTracks();
   }
 
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
-  getAlbum(@Param() { id }: IdParam): Album {
-    const user = this.albumService.getAlbum(id);
+  getTrack(@Param() { id }: IdParam): Track {
+    const user = this.trackService.getTrack(id);
     if (!user) {
       throw new NotFoundException(Messages.NotFound);
     }
@@ -40,17 +40,17 @@ export class AlbumController {
 
   @Post()
   @UseInterceptors(ClassSerializerInterceptor)
-  createAlbum(@Body(new ValidationPipe()) dto: CreateAlbumDto): Album {
-    return this.albumService.createAlbum(dto);
+  createTrack(@Body(new ValidationPipe()) dto: CreateTrackDto): Track {
+    return this.trackService.createTrack(dto);
   }
 
   @Put(':id')
   @UseInterceptors(ClassSerializerInterceptor)
   changePassword(
     @Param() { id }: IdParam,
-    @Body(new ValidationPipe()) dto: UpdateAlbumdDto,
-  ): Album {
-    const user = this.albumService.updateAlbum(id, dto);
+    @Body(new ValidationPipe()) dto: UpdateTrackdDto,
+  ): Track {
+    const user = this.trackService.updateTrack(id, dto);
     if (!user) {
       throw new NotFoundException(Messages.NotFound);
     }
@@ -62,7 +62,7 @@ export class AlbumController {
   @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(204)
   delete(@Param() { id }: IdParam): void {
-    const user = this.albumService.deleteAlbum(id);
+    const user = this.trackService.deleteTrack(id);
     if (!user) {
       throw new NotFoundException(Messages.NotFound);
     }

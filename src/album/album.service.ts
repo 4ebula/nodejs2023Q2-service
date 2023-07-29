@@ -7,11 +7,11 @@ import { CreateAlbumDto, UpdateAlbumdDto } from './models';
 export class AlbumService {
   constructor(private db: DB) {}
 
-  getUsers(): Album[] {
+  getAlbums(): Album[] {
     return this.db.album.findMany();
   }
 
-  getUser(id: string): Album | null {
+  getAlbum(id: string): Album | null {
     return this.db.album.findUnique(id) ?? null;
   }
 
