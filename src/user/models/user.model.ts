@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export interface UserBasic {
   id: string; // uuid v4
@@ -30,9 +30,4 @@ export class UpdatePasswordDto {
 
 export interface CreateUserData {
   data: CreateUserDto;
-}
-
-export class UserParam {
-  @IsUUID(4, { each: true })
-  id: string;
 }

@@ -1,10 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { User } from './user';
 import { CreateUserData, UserBasic } from 'src/user/models';
+import { Artist } from './artist';
+import { ArtistData } from 'src/artist/models';
 
 @Injectable()
 export class DB {
   private users: Map<string, User> = new Map();
+  private artists: Map<string, Artist> = new Map();
+
+  constructor() {
+    const artist = new Artist('Slayer', true);
+    this.artists.set(artist.id, artist);
+  }
 
   get user() {
     return {
@@ -36,6 +44,34 @@ export class DB {
 
         this.users.delete(id);
         return user;
+      },
+    };
+  }
+
+  get artist() {
+    return {
+      findMany: (): Artist[] => [...this.artists.values()],
+      findUnique: (id: string): Artist | undefined => this.artists.get(id),
+      create: ({ data: { name, grammy } }: ArtistData): Artist | null => {
+        const artist = new Artist(name, grammy);
+        this.artists.set(artist.id, artist);
+        return artist;
+      },
+      update: (
+        id: string,
+        { data: { name, grammy } }: ArtistData,
+      ): Artist | null => {
+        const artist = this.artists.get(id);
+        return artist.update(name, grammy);
+      },
+      delete: (id: string): Artist | null => {
+        const artist = this.artists.get(id);
+        if (!artist) {
+          return null;
+        }
+
+        this.artists.delete(id);
+        return artist;
       },
     };
   }

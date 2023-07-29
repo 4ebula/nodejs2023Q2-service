@@ -9,33 +9,29 @@ import {
   ValidationPipe,
   UseInterceptors,
   ClassSerializerInterceptor,
-  ConflictException,
   NotFoundException,
   HttpCode,
 } from '@nestjs/common';
-import {
-  UserBasic,
-  CreateUserDto,
-  UpdatePasswordDto,
-  Messages,
-} from './models';
-import { UserService } from './user.service';
+import { ArtistService } from './artist.service';
+import { Artist } from 'src/db/artist';
 import { IdParam } from 'src/shared/models/shared.model';
+import { Messages } from './models/messages';
+import { CreateArtistDto, UpdateArtistdDto } from './models';
 
-@Controller('user')
-export class UserController {
-  constructor(private userService: UserService) {}
+@Controller('artist')
+export class ArtistController {
+  constructor(private artistService: ArtistService) {}
 
   @Get()
   @UseInterceptors(ClassSerializerInterceptor)
-  getUsers(): UserBasic[] {
-    return this.userService.getUsers();
+  getUsers(): Artist[] {
+    return this.artistService.getUsers();
   }
 
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
-  getUser(@Param() { id }: IdParam): UserBasic {
-    const user = this.userService.getUser(id);
+  getUser(@Param() { id }: IdParam): Artist {
+    const user = this.artistService.getUser(id);
     if (!user) {
       throw new NotFoundException(Messages.NotFound);
     }
@@ -44,22 +40,17 @@ export class UserController {
 
   @Post()
   @UseInterceptors(ClassSerializerInterceptor)
-  createUser(@Body(new ValidationPipe()) dto: CreateUserDto): UserBasic {
-    const user = this.userService.createUser(dto);
-    if (!user) {
-      throw new ConflictException(Messages.AlreadyExists);
-    }
-
-    return user;
+  createUser(@Body(new ValidationPipe()) dto: CreateArtistDto): Artist {
+    return this.artistService.createArtist(dto);
   }
 
   @Put(':id')
   @UseInterceptors(ClassSerializerInterceptor)
   changePassword(
     @Param() { id }: IdParam,
-    @Body(new ValidationPipe()) dto: UpdatePasswordDto,
-  ): UserBasic {
-    const user = this.userService.changePassword(id, dto);
+    @Body(new ValidationPipe()) dto: UpdateArtistdDto,
+  ): Artist {
+    const user = this.artistService.updateArtist(id, dto);
     if (!user) {
       throw new NotFoundException(Messages.NotFound);
     }
@@ -71,7 +62,7 @@ export class UserController {
   @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(204)
   delete(@Param() { id }: IdParam): void {
-    const user = this.userService.deleteUser(id);
+    const user = this.artistService.deleteArtist(id);
     if (!user) {
       throw new NotFoundException(Messages.NotFound);
     }
