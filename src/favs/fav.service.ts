@@ -51,7 +51,7 @@ export class FavService {
 
   deleteTrack(id: string): Track | null {
     const track = this.db.fav.findUnique(FavKeys.Track, id);
-    console.log(track);
+
     if (!track) {
       return null;
     }
