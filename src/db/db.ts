@@ -7,6 +7,7 @@ import { Album } from './album';
 import { AlbumData } from 'src/album/models';
 import { Track } from './track';
 import { TrackData } from 'src/track/models';
+import { Fav, FavKeys } from './fav';
 
 @Injectable()
 export class DB {
@@ -14,6 +15,7 @@ export class DB {
   private artists: Map<string, Artist> = new Map();
   private albums: Map<string, Album> = new Map();
   private tracks: Map<string, Track> = new Map();
+  private favs: Fav = { artists: [], albums: [], tracks: [] };
 
   get user() {
     return {
@@ -80,6 +82,8 @@ export class DB {
           .filter((track) => track.artistId === id)
           .forEach((track) => track.updateArtist(null));
 
+        this.fav.delete(FavKeys.Artist, id);
+
         return artist;
       },
     };
@@ -112,6 +116,8 @@ export class DB {
           .filter((track) => track.albumId === id)
           .forEach((track) => track.updateAlbum(null));
 
+        this.fav.delete(FavKeys.Album, id);
+
         return album;
       },
     };
@@ -142,7 +148,48 @@ export class DB {
         }
 
         this.tracks.delete(id);
+        this.fav.delete(FavKeys.Track, id);
+
         return track;
+      },
+    };
+  }
+
+  get fav() {
+    return {
+      findMany: (): Fav => this.favs,
+      findUnique: (key: FavKeys, id: string) => {
+        const index = this.favs[key].findIndex(
+          (el: Artist | Album | Track) => el.id === id,
+        );
+        if (index !== -1) {
+          return this.favs[key][index];
+        }
+      },
+      create: (key: FavKeys, payload: Track | Album | Artist): void => {
+        switch (key) {
+          case FavKeys.Track:
+            this.favs.tracks.push(payload as Track);
+            break;
+          case FavKeys.Album:
+            this.favs.albums.push(payload as Album);
+            break;
+          case FavKeys.Artist:
+            this.favs.artists.push(payload as Artist);
+            break;
+          default:
+            break;
+        }
+      },
+      delete: (key: FavKeys, id: string): Artist | Album | Track => {
+        const index = this.favs[key].findIndex(
+          (el: Artist | Album | Track) => el.id === id,
+        );
+        if (index !== -1) {
+          const item = this.favs[key][index];
+          this.favs[key].splice(index, 1);
+          return item;
+        }
       },
     };
   }

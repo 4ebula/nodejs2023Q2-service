@@ -7,8 +7,6 @@ import {
   Delete,
   Param,
   ValidationPipe,
-  UseInterceptors,
-  ClassSerializerInterceptor,
   NotFoundException,
   HttpCode,
 } from '@nestjs/common';
@@ -23,13 +21,11 @@ export class TrackController {
   constructor(private trackService: TrackService) {}
 
   @Get()
-  @UseInterceptors(ClassSerializerInterceptor)
   getTracks(): Track[] {
     return this.trackService.getTracks();
   }
 
   @Get(':id')
-  @UseInterceptors(ClassSerializerInterceptor)
   getTrack(@Param() { id }: IdParam): Track {
     const user = this.trackService.getTrack(id);
     if (!user) {
@@ -39,14 +35,12 @@ export class TrackController {
   }
 
   @Post()
-  @UseInterceptors(ClassSerializerInterceptor)
   createTrack(@Body(new ValidationPipe()) dto: CreateTrackDto): Track {
     return this.trackService.createTrack(dto);
   }
 
   @Put(':id')
-  @UseInterceptors(ClassSerializerInterceptor)
-  changePassword(
+  updateTrack(
     @Param() { id }: IdParam,
     @Body(new ValidationPipe()) dto: UpdateTrackdDto,
   ): Track {
@@ -59,7 +53,6 @@ export class TrackController {
   }
 
   @Delete(':id')
-  @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(204)
   delete(@Param() { id }: IdParam): void {
     const user = this.trackService.deleteTrack(id);

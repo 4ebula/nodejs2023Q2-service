@@ -7,8 +7,6 @@ import {
   Delete,
   Param,
   ValidationPipe,
-  UseInterceptors,
-  ClassSerializerInterceptor,
   NotFoundException,
   HttpCode,
 } from '@nestjs/common';
@@ -23,13 +21,11 @@ export class ArtistController {
   constructor(private artistService: ArtistService) {}
 
   @Get()
-  @UseInterceptors(ClassSerializerInterceptor)
   getArtists(): Artist[] {
     return this.artistService.getArtists();
   }
 
   @Get(':id')
-  @UseInterceptors(ClassSerializerInterceptor)
   getArtist(@Param() { id }: IdParam): Artist {
     const user = this.artistService.getArtist(id);
     if (!user) {
@@ -39,14 +35,12 @@ export class ArtistController {
   }
 
   @Post()
-  @UseInterceptors(ClassSerializerInterceptor)
   createArtist(@Body(new ValidationPipe()) dto: CreateArtistDto): Artist {
     return this.artistService.createArtist(dto);
   }
 
   @Put(':id')
-  @UseInterceptors(ClassSerializerInterceptor)
-  changePassword(
+  updateArtist(
     @Param() { id }: IdParam,
     @Body(new ValidationPipe()) dto: UpdateArtistdDto,
   ): Artist {
@@ -59,7 +53,6 @@ export class ArtistController {
   }
 
   @Delete(':id')
-  @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(204)
   delete(@Param() { id }: IdParam): void {
     const user = this.artistService.deleteArtist(id);

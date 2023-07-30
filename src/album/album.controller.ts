@@ -7,8 +7,6 @@ import {
   Delete,
   Param,
   ValidationPipe,
-  UseInterceptors,
-  ClassSerializerInterceptor,
   NotFoundException,
   HttpCode,
 } from '@nestjs/common';
@@ -23,13 +21,11 @@ export class AlbumController {
   constructor(private albumService: AlbumService) {}
 
   @Get()
-  @UseInterceptors(ClassSerializerInterceptor)
   getAlbums(): Album[] {
     return this.albumService.getAlbums();
   }
 
   @Get(':id')
-  @UseInterceptors(ClassSerializerInterceptor)
   getAlbum(@Param() { id }: IdParam): Album {
     const user = this.albumService.getAlbum(id);
     if (!user) {
@@ -39,14 +35,12 @@ export class AlbumController {
   }
 
   @Post()
-  @UseInterceptors(ClassSerializerInterceptor)
   createAlbum(@Body(new ValidationPipe()) dto: CreateAlbumDto): Album {
     return this.albumService.createAlbum(dto);
   }
 
   @Put(':id')
-  @UseInterceptors(ClassSerializerInterceptor)
-  changePassword(
+  udapteAlbum(
     @Param() { id }: IdParam,
     @Body(new ValidationPipe()) dto: UpdateAlbumdDto,
   ): Album {
@@ -59,7 +53,6 @@ export class AlbumController {
   }
 
   @Delete(':id')
-  @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(204)
   delete(@Param() { id }: IdParam): void {
     const user = this.albumService.deleteAlbum(id);
