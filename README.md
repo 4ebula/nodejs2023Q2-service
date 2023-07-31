@@ -8,7 +8,11 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone git@github.com:4ebula/nodejs2023Q2-service.git
+```
+or 
+```
+git clone https://github.com/4ebula/nodejs2023Q2-service.git
 ```
 
 ## Installing NPM modules
@@ -17,15 +21,21 @@ git clone {repository URL}
 npm install
 ```
 
+## Env
+Create .env with env config (or copy .env.example and rename it to .env)
+
 ## Running application
 
 ```
 npm start
 ```
 
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
+After starting the app on port (declared in .env file or 4000 as default) you can open
+in your browser OpenAPI documentation by typing http://localhost:{port}/doc/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
+
+## Endpoint
+You can see available endpoint on http://localhost:{port}/doc/
 
 ## Testing
 
@@ -48,25 +58,3 @@ To run all test with authorization
 ```
 npm run test:auth
 ```
-
-To run only specific test suite with authorization
-
-```
-npm run test:auth -- <path to suite>
-```
-
-### Auto-fix and format
-
-```
-npm run lint
-```
-
-```
-npm run format
-```
-
-### Debugging in VSCode
-
-Press <kbd>F5</kbd> to debug.
-
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
