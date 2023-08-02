@@ -11,7 +11,7 @@ async function bootstrap() {
 
   const file = await readFile('doc/api.yaml', 'utf-8');
   const doc = yamlLoad(file);
-  SwaggerModule.setup('docs', app, doc);
+  SwaggerModule.setup('doc', app, doc);
 
   await app.listen(parseInt(process.env.PORT, 10) || 4000);
 }
