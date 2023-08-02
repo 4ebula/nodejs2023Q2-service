@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { Album } from 'src/db/album';
-import { IdParam } from 'src/shared/models/shared.model';
+import { IdParam } from 'src/shared/models';
 import { Messages } from './models/messages';
 import { CreateAlbumDto, UpdateAlbumdDto } from './models';
 

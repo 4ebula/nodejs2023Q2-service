@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { Track } from 'src/db/track';
-import { IdParam } from 'src/shared/models/shared.model';
+import { IdParam } from 'src/shared/models';
 import { Messages } from './models/messages';
 import { CreateTrackDto, UpdateTrackdDto } from './models';
 

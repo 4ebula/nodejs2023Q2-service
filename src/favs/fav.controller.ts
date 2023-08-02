@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { FavService } from './fav.service';
 import { Fav } from 'src/db/fav';
-import { IdParam } from 'src/shared/models/shared.model';
+import { IdParam } from 'src/shared/models';
 import { Messages } from './models';
 
 @Controller('favs')

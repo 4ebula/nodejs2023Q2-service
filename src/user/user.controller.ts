@@ -20,7 +20,7 @@ import {
   Messages,
 } from './models';
 import { UserService } from './user.service';
-import { IdParam } from 'src/shared/models/shared.model';
+import { IdParam } from 'src/shared/models';
 
 @Controller('user')
 export class UserController {

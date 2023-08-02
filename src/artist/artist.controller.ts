@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ArtistService } from './artist.service';
 import { Artist } from 'src/db/artist';
-import { IdParam } from 'src/shared/models/shared.model';
+import { IdParam } from 'src/shared/models';
 import { Messages } from './models/messages';
 import { CreateArtistDto, UpdateArtistdDto } from './models';
 
