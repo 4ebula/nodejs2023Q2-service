@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { User } from './user';
-import { CreateUserData, UserBasic } from 'src/user/models';
 import { Artist } from './artist';
 import { ArtistData } from 'src/artist/models';
 import { Album } from './album';
@@ -11,45 +9,10 @@ import { Fav, FavKeys } from './fav';
 
 @Injectable()
 export class DB {
-  private users: Map<string, User> = new Map();
   private artists: Map<string, Artist> = new Map();
   private albums: Map<string, Album> = new Map();
   private tracks: Map<string, Track> = new Map();
   private favs: Fav = { artists: [], albums: [], tracks: [] };
-
-  get user() {
-    return {
-      findMany: (): UserBasic[] => [...this.users.values()],
-      findUnique: (id: string): User | undefined => this.users.get(id),
-      create: ({
-        data: { login, password },
-      }: CreateUserData): UserBasic | null => {
-        if (this.checkUserExistence(login)) {
-          return null;
-        }
-
-        const user = new User(login, password);
-        this.users.set(user.id, user);
-        return user;
-      },
-      update: (
-        id: string,
-        { newPassword }: { newPassword: string },
-      ): UserBasic | null => {
-        const user = this.users.get(id);
-        return user.updatePassword(newPassword);
-      },
-      delete: (id: string): UserBasic | null => {
-        const user = this.users.get(id);
-        if (!user) {
-          return null;
-        }
-
-        this.users.delete(id);
-        return user;
-      },
-    };
-  }
 
   get artist() {
     return {
@@ -192,9 +155,5 @@ export class DB {
         }
       },
     };
-  }
-
-  private checkUserExistence(login: string): boolean {
-    return [...this.users.values()].some((user) => user.login === login);
   }
 }

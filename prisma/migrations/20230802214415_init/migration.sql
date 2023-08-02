@@ -3,7 +3,7 @@ CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "login" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "version" SERIAL NOT NULL,
+    "version" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -49,6 +49,9 @@ CREATE TABLE "Favorites" (
 
     CONSTRAINT "Favorites_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_login_key" ON "User"("login");
 
 -- AddForeignKey
 ALTER TABLE "Artist" ADD CONSTRAINT "Artist_favoritedId_fkey" FOREIGN KEY ("favoritedId") REFERENCES "Favorites"("id") ON DELETE SET NULL ON UPDATE CASCADE;
