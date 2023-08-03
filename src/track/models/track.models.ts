@@ -43,12 +43,3 @@ export class UpdateTrackdDto {
   @IsOptional()
   albumId: string;
 }
-
-export interface TrackData {
-  data: {
-    name: string;
-    duration: number;
-    artistId: string | null;
-    albumId: string | null;
-  };
-}
