@@ -7,8 +7,10 @@ import { NotFoundError } from 'src/shared/models';
 export class FavService {
   private favId: string;
 
-  constructor(private db: DbService) {
-    this.setFavId();
+  constructor(private db: DbService) {}
+
+  async onModuleInit() {
+    await this.setFavId();
   }
 
   async getFavs(): Promise<Favorites> {
@@ -88,7 +90,17 @@ export class FavService {
   }
 
   private async setFavId(): Promise<void> {
-    const fav = await this.db.favorites.findFirst();
+    let fav = await this.db.favorites.findFirst();
+
+    if (!fav) {
+      fav = await this.db.favorites.create({
+        data: {
+          artists: { create: [] },
+          albums: { create: [] },
+          tracks: { create: [] },
+        },
+      });
+    }
 
     if (!this.favId) {
       this.favId = fav.id;
