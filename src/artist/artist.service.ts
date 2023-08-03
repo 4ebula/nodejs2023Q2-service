@@ -13,13 +13,13 @@ export class ArtistService {
   }
 
   async getArtist(id: string): Promise<Artist> {
-    const user = await this.db.artist.findUnique({ where: { id } });
+    const artist = await this.db.artist.findUnique({ where: { id } });
 
-    if (!user) {
+    if (!artist) {
       throw new NotFoundError();
     }
 
-    return user;
+    return artist;
   }
 
   async createArtist(dto: CreateArtistDto): Promise<Artist> {

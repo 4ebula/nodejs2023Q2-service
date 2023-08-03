@@ -1,50 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Artist } from './artist';
 import { Album } from './album';
-import { AlbumData } from 'src/album/models';
 import { Track } from './track';
 import { TrackData } from 'src/track/models';
 import { Fav, FavKeys } from './fav';
 
 @Injectable()
 export class DB {
-  private albums: Map<string, Album> = new Map();
   private tracks: Map<string, Track> = new Map();
   private favs: Fav = { artists: [], albums: [], tracks: [] };
-
-  get album() {
-    return {
-      findMany: (): Album[] => [...this.albums.values()],
-      findUnique: (id: string): Album | undefined => this.albums.get(id),
-      create: ({ data: { name, year, artistId } }: AlbumData): Album | null => {
-        const album = new Album(name, year, artistId);
-        this.albums.set(album.id, album);
-        return album;
-      },
-      update: (
-        id: string,
-        { data: { name, year, artistId } }: AlbumData,
-      ): Album | null => {
-        const album = this.albums.get(id);
-        return album.update(name, year, artistId);
-      },
-      delete: (id: string): Album | null => {
-        const album = this.albums.get(id);
-        if (!album) {
-          return null;
-        }
-
-        this.albums.delete(id);
-        [...this.tracks.values()]
-          .filter((track) => track.albumId === id)
-          .forEach((track) => track.updateAlbum(null));
-
-        this.fav.delete(FavKeys.Album, id);
-
-        return album;
-      },
-    };
-  }
 
   get track() {
     return {

@@ -34,11 +34,3 @@ export class UpdateAlbumdDto {
   @IsOptional()
   artistId: string;
 }
-
-export interface AlbumData {
-  data: {
-    name: string;
-    year: number;
-    artistId: string | null;
-  };
-}

@@ -1,1 +1,1 @@
-export * from './favorited.interceptor';
+export * from './trim-response.interceptor';

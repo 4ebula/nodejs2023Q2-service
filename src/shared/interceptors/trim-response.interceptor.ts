@@ -1,7 +1,6 @@
 import { NestInterceptor, CallHandler } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 
-// @Injectable()
 export class RemoveFavoritedInterceptor implements NestInterceptor {
   intercept(_: any, next: CallHandler): Observable<any> {
     return next.handle().pipe(

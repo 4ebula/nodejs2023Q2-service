@@ -7,57 +7,63 @@ import {
   Delete,
   Param,
   ValidationPipe,
-  NotFoundException,
   HttpCode,
+  UseInterceptors,
 } from '@nestjs/common';
+import { Album } from '@prisma/client';
+import { RemoveFavoritedInterceptor } from 'src/shared/interceptors';
+import { ErrorService } from 'src/shared/services';
 import { AlbumService } from './album.service';
-import { Album } from 'src/db/album';
 import { IdParam } from 'src/shared/models';
-import { Messages } from './models/messages';
 import { CreateAlbumDto, UpdateAlbumdDto } from './models';
 
 @Controller('album')
-export class AlbumController {
-  constructor(private albumService: AlbumService) {}
+@UseInterceptors(new RemoveFavoritedInterceptor())
+export class AlbumController extends ErrorService {
+  constructor(private albumService: AlbumService) {
+    super();
+  }
 
   @Get()
-  getAlbums(): Album[] {
-    return this.albumService.getAlbums();
+  async getAlbums(): Promise<Album[]> {
+    return await this.albumService.getAlbums();
   }
 
   @Get(':id')
-  getAlbum(@Param() { id }: IdParam): Album {
-    const user = this.albumService.getAlbum(id);
-    if (!user) {
-      throw new NotFoundException(Messages.NotFound);
+  async getAlbum(@Param() { id }: IdParam): Promise<Album> {
+    try {
+      return await this.albumService.getAlbum(id);
+    } catch (err) {
+      this.throwExceptions('Album', err);
     }
-    return user;
   }
 
   @Post()
-  createAlbum(@Body(new ValidationPipe()) dto: CreateAlbumDto): Album {
-    return this.albumService.createAlbum(dto);
+  async createAlbum(
+    @Body(new ValidationPipe()) dto: CreateAlbumDto,
+  ): Promise<Album> {
+    return await this.albumService.createAlbum(dto);
   }
 
   @Put(':id')
-  udapteAlbum(
+  async udapteAlbum(
     @Param() { id }: IdParam,
     @Body(new ValidationPipe()) dto: UpdateAlbumdDto,
-  ): Album {
-    const user = this.albumService.updateAlbum(id, dto);
-    if (!user) {
-      throw new NotFoundException(Messages.NotFound);
+  ): Promise<Album> {
+    try {
+      return await this.albumService.updateAlbum(id, dto);
+    } catch (err) {
+      this.throwExceptions('Album', err);
     }
-
-    return user;
   }
 
   @Delete(':id')
   @HttpCode(204)
-  delete(@Param() { id }: IdParam): void {
-    const user = this.albumService.deleteAlbum(id);
-    if (!user) {
-      throw new NotFoundException(Messages.NotFound);
+  async delete(@Param() { id }: IdParam): Promise<void> {
+    try {
+      await this.albumService.deleteAlbum(id);
+    } catch (err) {
+      this.throwExceptions('Album', err);
     }
   }
 }

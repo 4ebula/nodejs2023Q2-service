@@ -32,9 +32,7 @@ export class ArtistController extends ErrorService {
   @Get(':id')
   async getArtist(@Param() { id }: IdParam): Promise<Artist> {
     try {
-      const user = await this.artistService.getArtist(id);
-
-      return user;
+      return await this.artistService.getArtist(id);
     } catch (err) {
       this.throwExceptions('Artist', err);
     }
@@ -53,9 +51,7 @@ export class ArtistController extends ErrorService {
     @Body(new ValidationPipe()) dto: UpdateArtistdDto,
   ): Promise<Artist> {
     try {
-      const user = await this.artistService.updateArtist(id, dto);
-
-      return user;
+      return await this.artistService.updateArtist(id, dto);
     } catch (err) {
       this.throwExceptions('Artist', err);
     }
