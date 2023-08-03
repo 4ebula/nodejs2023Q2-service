@@ -1,39 +1,48 @@
 import { Injectable } from '@nestjs/common';
-import { Track } from 'src/db/track';
-import { DB } from 'src/db/db';
+import { Track } from '@prisma/client';
+import { DbService } from 'src/db';
+import { NotFoundError } from 'src/shared/models';
 import { CreateTrackDto, UpdateTrackdDto } from './models';
 
 @Injectable()
 export class TrackService {
-  constructor(private db: DB) {}
+  constructor(private db: DbService) {}
 
-  getTracks(): Track[] {
-    return this.db.track.findMany();
+  async getTracks(): Promise<Track[]> {
+    return await this.db.track.findMany();
   }
 
-  getTrack(id: string): Track | null {
-    return this.db.track.findUnique(id) ?? null;
+  async getTrack(id: string): Promise<Track> {
+    try {
+      return await this.db.track.findUniqueOrThrow({ where: { id } });
+    } catch {
+      throw new NotFoundError();
+    }
   }
 
-  createTrack(dto: CreateTrackDto): Track | null {
-    return this.db.track.create({ data: dto });
+  async createTrack(dto: CreateTrackDto): Promise<Track> {
+    return await this.db.track.create({ data: dto });
   }
 
-  updateTrack(
+  async updateTrack(
     id: string,
     { name, duration, artistId, albumId }: UpdateTrackdDto,
-  ): Track | null {
-    const track = this.db.track.findUnique(id);
-    if (!track) {
-      return null;
+  ): Promise<Track> {
+    try {
+      return await this.db.track.update({
+        where: { id },
+        data: { name, duration, artistId, albumId },
+      });
+    } catch {
+      throw new NotFoundError();
     }
-
-    return this.db.track.update(id, {
-      data: { name, duration, artistId, albumId },
-    });
   }
 
-  deleteTrack(id: string): Track | null {
-    return this.db.track.delete(id);
+  async deleteTrack(id: string): Promise<Track> {
+    try {
+      return await this.db.track.delete({ where: { id } });
+    } catch {
+      throw new NotFoundError();
+    }
   }
 }
