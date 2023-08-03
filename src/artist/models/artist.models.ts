@@ -25,10 +25,3 @@ export class UpdateArtistdDto {
   @IsOptional()
   grammy: boolean;
 }
-
-export interface ArtistData {
-  data: {
-    name: string;
-    grammy: boolean;
-  };
-}

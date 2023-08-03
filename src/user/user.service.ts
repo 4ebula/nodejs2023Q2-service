@@ -11,7 +11,7 @@ import { SALT_ROUNDS } from './config';
 
 @Injectable()
 export class UserService {
-  constructor(private db: DbService) {}
+  constructor(private readonly db: DbService) {}
 
   async getUsers(): Promise<User[]> {
     const users = await this.db.user.findMany();

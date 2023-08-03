@@ -1,34 +1,52 @@
 import { Injectable } from '@nestjs/common';
-import { Artist } from 'src/db/artist';
-import { DB } from 'src/db/db';
+import { DbService } from 'src/db';
 import { CreateArtistDto, UpdateArtistdDto } from './models';
+import { Artist } from '@prisma/client';
+import { NotFoundError } from 'src/shared/models';
 
 @Injectable()
 export class ArtistService {
-  constructor(private db: DB) {}
+  constructor(private db: DbService) {}
 
-  getArtists(): Artist[] {
-    return this.db.artist.findMany();
+  async getArtists(): Promise<Artist[]> {
+    return await this.db.artist.findMany();
   }
 
-  getArtist(id: string): Artist | null {
-    return this.db.artist.findUnique(id) ?? null;
-  }
+  async getArtist(id: string): Promise<Artist> {
+    const user = await this.db.artist.findUnique({ where: { id } });
 
-  createArtist(dto: CreateArtistDto): Artist | null {
-    return this.db.artist.create({ data: dto });
-  }
-
-  updateArtist(id: string, { name, grammy }: UpdateArtistdDto): Artist | null {
-    const artist = this.db.artist.findUnique(id);
-    if (!artist) {
-      return null;
+    if (!user) {
+      throw new NotFoundError();
     }
 
-    return this.db.artist.update(id, { data: { name, grammy } });
+    return user;
   }
 
-  deleteArtist(id: string): Artist | null {
-    return this.db.artist.delete(id);
+  async createArtist(dto: CreateArtistDto): Promise<Artist> {
+    return await this.db.artist.create({ data: dto });
+  }
+
+  async updateArtist(
+    id: string,
+    { name, grammy }: UpdateArtistdDto,
+  ): Promise<Artist> {
+    const artist = await this.db.artist.findUnique({ where: { id } });
+
+    if (!artist) {
+      throw new NotFoundError();
+    }
+
+    return await this.db.artist.update({
+      where: { id },
+      data: { name, grammy },
+    });
+  }
+
+  async deleteArtist(id: string): Promise<void> {
+    try {
+      await this.db.artist.delete({ where: { id } });
+    } catch {
+      throw new NotFoundError();
+    }
   }
 }

@@ -38,15 +38,13 @@ export class FavService {
   }
 
   addArtist(id: string) {
-    const artist = this.db.artist.findUnique(id);
-
-    if (!artist) {
-      return null;
-    }
-
-    this.db.fav.create(FavKeys.Artist, artist);
-
-    return artist;
+    // const artist = this.db.artist.findUnique(id);
+    // if (!artist) {
+    //   return null;
+    // }
+    // this.db.fav.create(FavKeys.Artist, artist);
+    // return artist;
+    return { id, name: '', grammy: false };
   }
 
   deleteTrack(id: string): Track | null {
