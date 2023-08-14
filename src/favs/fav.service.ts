@@ -1,81 +1,109 @@
 import { Injectable } from '@nestjs/common';
-import { Album } from 'src/db/album';
-import { Artist } from 'src/db/artist';
-import { DB } from 'src/db/db';
-import { Fav, FavKeys } from 'src/db/fav';
-import { Track } from 'src/db/track';
+import { Album, Artist, Favorites, Track } from '@prisma/client';
+import { DbService } from 'src/db';
+import { NotFoundError } from 'src/shared/models';
 
 @Injectable()
 export class FavService {
-  constructor(private db: DB) {}
+  private favId: string;
 
-  getFavs(): Fav {
-    return this.db.fav.findMany();
+  constructor(private db: DbService) {}
+
+  async onModuleInit() {
+    await this.setFavId();
   }
 
-  addTrack(id: string) {
-    const track = this.db.track.findUnique(id);
-
-    if (!track) {
-      return null;
-    }
-
-    this.db.fav.create(FavKeys.Track, track);
-
-    return track;
+  async getFavs(): Promise<Favorites> {
+    return await this.db.favorites.findFirst({
+      include: {
+        artists: true,
+        albums: true,
+        tracks: true,
+      },
+    });
   }
 
-  addAlbum(id: string) {
-    const album = this.db.album.findUnique(id);
-
-    if (!album) {
-      return null;
+  async addTrack(trackId: string): Promise<Track> {
+    try {
+      return await this.db.track.update({
+        where: { id: trackId },
+        data: { favoritedId: this.favId },
+      });
+    } catch {
+      throw new NotFoundError();
     }
-
-    this.db.fav.create(FavKeys.Album, album);
-
-    return album;
   }
 
-  addArtist(id: string) {
-    const artist = this.db.artist.findUnique(id);
-
-    if (!artist) {
-      return null;
+  async addAlbum(albumId: string): Promise<Album> {
+    try {
+      return await this.db.album.update({
+        where: { id: albumId },
+        data: { favoritedId: this.favId },
+      });
+    } catch {
+      throw new NotFoundError();
     }
-
-    this.db.fav.create(FavKeys.Artist, artist);
-
-    return artist;
   }
 
-  deleteTrack(id: string): Track | null {
-    const track = this.db.fav.findUnique(FavKeys.Track, id);
-
-    if (!track) {
-      return null;
+  async addArtist(artistId: string): Promise<Artist> {
+    try {
+      return await this.db.artist.update({
+        where: { id: artistId },
+        data: { favoritedId: this.favId },
+      });
+    } catch {
+      throw new NotFoundError();
     }
-
-    return this.db.fav.delete(FavKeys.Track, id) as Track;
   }
 
-  deleteAlbum(id: string): Album | null {
-    const album = this.db.fav.findUnique(FavKeys.Album, id);
-
-    if (!album) {
-      return null;
+  async deleteTrack(trackId: string): Promise<Track> {
+    try {
+      return await this.db.track.update({
+        where: { id: trackId, favoritedId: this.favId },
+        data: { favoritedId: null },
+      });
+    } catch {
+      throw new NotFoundError();
     }
-
-    return this.db.fav.delete(FavKeys.Album, id) as Album;
   }
 
-  deleteArtist(id: string): Artist | null {
-    const artist = this.db.fav.findUnique(FavKeys.Artist, id);
+  async deleteAlbum(albumId: string): Promise<Album> {
+    try {
+      return await this.db.album.update({
+        where: { id: albumId, favoritedId: this.favId },
+        data: { favoritedId: null },
+      });
+    } catch {
+      throw new NotFoundError();
+    }
+  }
 
-    if (!artist) {
-      return null;
+  async deleteArtist(artistId: string): Promise<Artist> {
+    try {
+      return await this.db.artist.update({
+        where: { id: artistId, favoritedId: this.favId },
+        data: { favoritedId: null },
+      });
+    } catch {
+      throw new NotFoundError();
+    }
+  }
+
+  private async setFavId(): Promise<void> {
+    let fav = await this.db.favorites.findFirst();
+
+    if (!fav) {
+      fav = await this.db.favorites.create({
+        data: {
+          artists: { create: [] },
+          albums: { create: [] },
+          tracks: { create: [] },
+        },
+      });
     }
 
-    return this.db.fav.delete(FavKeys.Artist, id) as Artist;
+    if (!this.favId) {
+      this.favId = fav.id;
+    }
   }
 }

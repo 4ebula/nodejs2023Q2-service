@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { DbModule } from './db/db.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
@@ -11,6 +12,7 @@ import { FavModule } from './favs/fav.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    DbModule,
     UserModule,
     ArtistModule,
     AlbumModule,

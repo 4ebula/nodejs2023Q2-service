@@ -7,57 +7,63 @@ import {
   Delete,
   Param,
   ValidationPipe,
-  NotFoundException,
   HttpCode,
+  UseInterceptors,
 } from '@nestjs/common';
+import { Artist } from '@prisma/client';
+import { IdParam } from 'src/shared/models';
+import { RemoveFavoritedInterceptor } from 'src/shared/interceptors';
+import { ErrorService } from 'src/shared/services';
 import { ArtistService } from './artist.service';
-import { Artist } from 'src/db/artist';
-import { IdParam } from 'src/shared/models/shared.model';
-import { Messages } from './models/messages';
 import { CreateArtistDto, UpdateArtistdDto } from './models';
 
 @Controller('artist')
-export class ArtistController {
-  constructor(private artistService: ArtistService) {}
+@UseInterceptors(new RemoveFavoritedInterceptor())
+export class ArtistController extends ErrorService {
+  constructor(private artistService: ArtistService) {
+    super();
+  }
 
   @Get()
-  getArtists(): Artist[] {
-    return this.artistService.getArtists();
+  async getArtists(): Promise<Artist[]> {
+    return await this.artistService.getArtists();
   }
 
   @Get(':id')
-  getArtist(@Param() { id }: IdParam): Artist {
-    const user = this.artistService.getArtist(id);
-    if (!user) {
-      throw new NotFoundException(Messages.NotFound);
+  async getArtist(@Param() { id }: IdParam): Promise<Artist> {
+    try {
+      return await this.artistService.getArtist(id);
+    } catch (err) {
+      this.throwExceptions('Artist', err);
     }
-    return user;
   }
 
   @Post()
-  createArtist(@Body(new ValidationPipe()) dto: CreateArtistDto): Artist {
-    return this.artistService.createArtist(dto);
+  async createArtist(
+    @Body(new ValidationPipe()) dto: CreateArtistDto,
+  ): Promise<Artist> {
+    return await this.artistService.createArtist(dto);
   }
 
   @Put(':id')
-  updateArtist(
+  async updateArtist(
     @Param() { id }: IdParam,
     @Body(new ValidationPipe()) dto: UpdateArtistdDto,
-  ): Artist {
-    const user = this.artistService.updateArtist(id, dto);
-    if (!user) {
-      throw new NotFoundException(Messages.NotFound);
+  ): Promise<Artist> {
+    try {
+      return await this.artistService.updateArtist(id, dto);
+    } catch (err) {
+      this.throwExceptions('Artist', err);
     }
-
-    return user;
   }
 
   @Delete(':id')
   @HttpCode(204)
-  delete(@Param() { id }: IdParam): void {
-    const user = this.artistService.deleteArtist(id);
-    if (!user) {
-      throw new NotFoundException(Messages.NotFound);
+  async delete(@Param() { id }: IdParam): Promise<void> {
+    try {
+      await this.artistService.deleteArtist(id);
+    } catch (err) {
+      this.throwExceptions('Artist', err);
     }
   }
 }

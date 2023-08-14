@@ -1,37 +1,48 @@
 import { Injectable } from '@nestjs/common';
-import { Album } from 'src/db/album';
-import { DB } from 'src/db/db';
+import { Album } from '@prisma/client';
+import { DbService } from 'src/db';
 import { CreateAlbumDto, UpdateAlbumdDto } from './models';
+import { NotFoundError } from 'src/shared/models';
 
 @Injectable()
 export class AlbumService {
-  constructor(private db: DB) {}
+  constructor(private db: DbService) {}
 
-  getAlbums(): Album[] {
-    return this.db.album.findMany();
+  async getAlbums(): Promise<Album[]> {
+    return await this.db.album.findMany();
   }
 
-  getAlbum(id: string): Album | null {
-    return this.db.album.findUnique(id) ?? null;
+  async getAlbum(id: string): Promise<Album> {
+    try {
+      return await this.db.album.findUniqueOrThrow({ where: { id } });
+    } catch {
+      throw new NotFoundError();
+    }
   }
 
-  createAlbum(dto: CreateAlbumDto): Album | null {
-    return this.db.album.create({ data: dto });
+  async createAlbum(dto: CreateAlbumDto): Promise<Album> {
+    return await this.db.album.create({ data: dto });
   }
 
-  updateAlbum(
+  async updateAlbum(
     id: string,
     { name, year, artistId }: UpdateAlbumdDto,
-  ): Album | null {
-    const album = this.db.album.findUnique(id);
-    if (!album) {
-      return null;
+  ): Promise<Album> {
+    try {
+      return await this.db.album.update({
+        where: { id },
+        data: { name, year, artistId },
+      });
+    } catch {
+      throw new NotFoundError();
     }
-
-    return this.db.album.update(id, { data: { name, year, artistId } });
   }
 
-  deleteAlbum(id: string): Album | null {
-    return this.db.album.delete(id);
+  async deleteAlbum(id: string): Promise<Album> {
+    try {
+      return await this.db.album.delete({ where: { id } });
+    } catch {
+      throw new NotFoundError();
+    }
   }
 }

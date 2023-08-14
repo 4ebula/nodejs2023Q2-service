@@ -1,11 +1,42 @@
 import { IsNotEmpty, IsString } from 'class-validator';
+import { Exclude } from 'class-transformer';
 
-export interface UserBasic {
-  id: string; // uuid v4
+export class User {
+  id: string;
   login: string;
-  version: number; // integer number, increments on update
-  createdAt: number; // timestamp of creation
-  updatedAt: number; // timestamp of last update
+  version: number;
+  createdAt: number;
+  updatedAt: number;
+
+  @Exclude()
+  password: string;
+
+  constructor(user: UserFromDb) {
+    const { id, login, version, password, createdAt, updatedAt } = user;
+    this.id = id;
+    this.login = login;
+    this.version = version;
+    this.password = password;
+    this.createdAt = new Date(createdAt).getTime();
+    this.updatedAt = new Date(updatedAt).getTime();
+  }
+}
+
+interface UserBasic {
+  id: string;
+  login: string;
+  version: number;
+}
+
+export interface UserResponce extends UserBasic {
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface UserFromDb extends UserBasic {
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export class CreateUserDto {
@@ -26,8 +57,4 @@ export class UpdatePasswordDto {
   @IsString()
   @IsNotEmpty()
   newPassword: string;
-}
-
-export interface CreateUserData {
-  data: CreateUserDto;
 }

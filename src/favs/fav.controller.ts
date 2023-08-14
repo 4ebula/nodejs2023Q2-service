@@ -7,75 +7,83 @@ import {
   Param,
   Post,
   UnprocessableEntityException,
+  UseInterceptors,
 } from '@nestjs/common';
+import { Album, Artist, Favorites, Track } from '@prisma/client';
+import {
+  RemoveFavIdInterceptor,
+  RemoveFavoritedInterceptor,
+} from 'src/shared/interceptors';
+import { IdParam } from 'src/shared/models';
 import { FavService } from './fav.service';
-import { Fav } from 'src/db/fav';
-import { IdParam } from 'src/shared/models/shared.model';
-import { Messages } from './models';
 
 @Controller('favs')
 export class FavController {
   constructor(private favService: FavService) {}
 
   @Get()
-  getFavs(): Fav {
-    return this.favService.getFavs();
+  @UseInterceptors(new RemoveFavIdInterceptor())
+  async getFavs(): Promise<Favorites> {
+    return await this.favService.getFavs();
   }
 
   @Post('track/:id')
-  addTrack(@Param() { id }: IdParam) {
-    const res = this.favService.addTrack(id);
-
-    if (!res) {
-      throw new UnprocessableEntityException(Messages.TrackNotFound);
+  @UseInterceptors(new RemoveFavoritedInterceptor())
+  async addTrack(@Param() { id }: IdParam): Promise<Track> {
+    try {
+      return await this.favService.addTrack(id);
+    } catch (err) {
+      throw new UnprocessableEntityException('Track not found');
     }
   }
 
   @Post('album/:id')
-  addAlbum(@Param() { id }: IdParam) {
-    const res = this.favService.addAlbum(id);
-
-    if (!res) {
-      throw new UnprocessableEntityException(Messages.AlbumNotFound);
+  @UseInterceptors(new RemoveFavoritedInterceptor())
+  async addAlbum(@Param() { id }: IdParam): Promise<Album> {
+    try {
+      return await this.favService.addAlbum(id);
+    } catch (err) {
+      throw new UnprocessableEntityException('Album not found');
     }
   }
 
   @Post('artist/:id')
-  addArtist(@Param() { id }: IdParam) {
-    const res = this.favService.addArtist(id);
-
-    if (!res) {
-      throw new UnprocessableEntityException(Messages.ArtistNotFound);
+  @UseInterceptors(new RemoveFavoritedInterceptor())
+  async addArtist(@Param() { id }: IdParam): Promise<Artist> {
+    try {
+      return await this.favService.addArtist(id);
+    } catch (err) {
+      throw new UnprocessableEntityException('Artist not found');
     }
   }
 
   @Delete('track/:id')
   @HttpCode(204)
-  deleteTrack(@Param() { id }: IdParam) {
-    const res = this.favService.deleteTrack(id);
-
-    if (!res) {
-      throw new NotFoundException(Messages.TrackNotFound);
+  async deleteTrack(@Param() { id }: IdParam) {
+    try {
+      await this.favService.deleteTrack(id);
+    } catch (err) {
+      throw new NotFoundException('Track not found in favs');
     }
   }
 
   @Delete('album/:id')
   @HttpCode(204)
-  deleteAlbum(@Param() { id }: IdParam) {
-    const res = this.favService.deleteAlbum(id);
-
-    if (!res) {
-      throw new NotFoundException(Messages.AlbumNotFound);
+  async deleteAlbum(@Param() { id }: IdParam) {
+    try {
+      await this.favService.deleteAlbum(id);
+    } catch (err) {
+      throw new NotFoundException('Album not found in favs');
     }
   }
 
   @Delete('artist/:id')
   @HttpCode(204)
-  deleteArtist(@Param() { id }: IdParam) {
-    const res = this.favService.deleteArtist(id);
-
-    if (!res) {
-      throw new NotFoundException(Messages.ArtistNotFound);
+  async deleteArtist(@Param() { id }: IdParam): Promise<void> {
+    try {
+      await this.favService.deleteArtist(id);
+    } catch (err) {
+      throw new NotFoundException('Artist not found in favs');
     }
   }
 }

@@ -12,15 +12,17 @@ import {
   ConflictException,
   NotFoundException,
   HttpCode,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
-  UserBasic,
-  CreateUserDto,
-  UpdatePasswordDto,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  IdParam,
   Messages,
-} from './models';
+} from 'src/shared/models';
+import { UserResponce, CreateUserDto, UpdatePasswordDto } from './models';
 import { UserService } from './user.service';
-import { IdParam } from 'src/shared/models/shared.model';
 
 @Controller('user')
 export class UserController {
@@ -28,52 +30,63 @@ export class UserController {
 
   @Get()
   @UseInterceptors(ClassSerializerInterceptor)
-  getUsers(): UserBasic[] {
-    return this.userService.getUsers();
+  async getUsers(): Promise<UserResponce[]> {
+    return await this.userService.getUsers();
   }
 
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
-  getUser(@Param() { id }: IdParam): UserBasic {
-    const user = this.userService.getUser(id);
+  async getUser(@Param() { id }: IdParam): Promise<UserResponce> {
+    const user = await this.userService.getUser(id);
     if (!user) {
-      throw new NotFoundException(Messages.NotFound);
+      throw new NotFoundException(`User ${Messages.NotFound}`);
     }
     return user;
   }
 
   @Post()
   @UseInterceptors(ClassSerializerInterceptor)
-  createUser(@Body(new ValidationPipe()) dto: CreateUserDto): UserBasic {
-    const user = this.userService.createUser(dto);
-    if (!user) {
-      throw new ConflictException(Messages.AlreadyExists);
-    }
+  async createUser(
+    @Body(new ValidationPipe()) dto: CreateUserDto,
+  ): Promise<UserResponce> {
+    try {
+      const user = await this.userService.createUser(dto);
 
-    return user;
+      return user;
+    } catch (err) {
+      if (err instanceof ConflictError) {
+        throw new ConflictException(`User ${Messages.AlreadyExists}`);
+      }
+    }
   }
 
   @Put(':id')
   @UseInterceptors(ClassSerializerInterceptor)
-  changePassword(
+  async changePassword(
     @Param() { id }: IdParam,
     @Body(new ValidationPipe()) dto: UpdatePasswordDto,
-  ): UserBasic {
-    const user = this.userService.changePassword(id, dto);
-    if (!user) {
-      throw new NotFoundException(Messages.NotFound);
-    }
+  ): Promise<UserResponce> {
+    try {
+      return await this.userService.changePassword(id, dto);
+    } catch (err) {
+      if (err instanceof NotFoundError) {
+        throw new NotFoundException(`User ${Messages.NotFound}`);
+      }
 
-    return user;
+      if (err instanceof ForbiddenError) {
+        throw new ForbiddenException(err.message);
+      }
+    }
   }
 
   @Delete(':id')
   @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(204)
-  delete(@Param() { id }: IdParam): void {
-    const user = this.userService.deleteUser(id);
-    if (!user) {
-      throw new NotFoundException(Messages.NotFound);
+  async delete(@Param() { id }: IdParam): Promise<void> {
+    try {
+      await this.userService.deleteUser(id);
+    } catch {
+      throw new NotFoundException(`User ${Messages.NotFound}`);
     }
   }
 }

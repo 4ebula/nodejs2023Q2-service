@@ -7,57 +7,63 @@ import {
   Delete,
   Param,
   ValidationPipe,
-  NotFoundException,
   HttpCode,
+  UseInterceptors,
 } from '@nestjs/common';
-import { TrackService } from './track.service';
-import { Track } from 'src/db/track';
-import { IdParam } from 'src/shared/models/shared.model';
-import { Messages } from './models/messages';
+import { Track } from '@prisma/client';
+import { IdParam } from 'src/shared/models';
+import { ErrorService } from 'src/shared/services';
+import { RemoveFavoritedInterceptor } from 'src/shared/interceptors';
 import { CreateTrackDto, UpdateTrackdDto } from './models';
+import { TrackService } from './track.service';
 
 @Controller('track')
-export class TrackController {
-  constructor(private trackService: TrackService) {}
+@UseInterceptors(new RemoveFavoritedInterceptor())
+export class TrackController extends ErrorService {
+  constructor(private trackService: TrackService) {
+    super();
+  }
 
   @Get()
-  getTracks(): Track[] {
-    return this.trackService.getTracks();
+  async getTracks(): Promise<Track[]> {
+    return await this.trackService.getTracks();
   }
 
   @Get(':id')
-  getTrack(@Param() { id }: IdParam): Track {
-    const user = this.trackService.getTrack(id);
-    if (!user) {
-      throw new NotFoundException(Messages.NotFound);
+  async getTrack(@Param() { id }: IdParam): Promise<Track> {
+    try {
+      return await this.trackService.getTrack(id);
+    } catch (err) {
+      this.throwExceptions('Track', err);
     }
-    return user;
   }
 
   @Post()
-  createTrack(@Body(new ValidationPipe()) dto: CreateTrackDto): Track {
-    return this.trackService.createTrack(dto);
+  async createTrack(
+    @Body(new ValidationPipe()) dto: CreateTrackDto,
+  ): Promise<Track> {
+    return await this.trackService.createTrack(dto);
   }
 
   @Put(':id')
-  updateTrack(
+  async updateTrack(
     @Param() { id }: IdParam,
     @Body(new ValidationPipe()) dto: UpdateTrackdDto,
-  ): Track {
-    const user = this.trackService.updateTrack(id, dto);
-    if (!user) {
-      throw new NotFoundException(Messages.NotFound);
+  ): Promise<Track> {
+    try {
+      return await this.trackService.updateTrack(id, dto);
+    } catch (err) {
+      this.throwExceptions('Track', err);
     }
-
-    return user;
   }
 
   @Delete(':id')
   @HttpCode(204)
-  delete(@Param() { id }: IdParam): void {
-    const user = this.trackService.deleteTrack(id);
-    if (!user) {
-      throw new NotFoundException(Messages.NotFound);
+  async delete(@Param() { id }: IdParam): Promise<void> {
+    try {
+      await this.trackService.deleteTrack(id);
+    } catch (err) {
+      this.throwExceptions('Track', err);
     }
   }
 }
