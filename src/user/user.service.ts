@@ -1,17 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { compare, hash } from 'bcrypt';
 import { DbService } from 'src/db';
-import {
-  ConflictError,
-  ForbiddenError,
-  NotFoundError,
-} from 'src/shared/models';
+import { ForbiddenError, NotFoundError } from 'src/shared/models';
 import { CreateUserDto, UpdatePasswordDto, User } from './models';
-import { SALT_ROUNDS } from './config';
+import { UserSharedService } from 'src/shared/services';
 
 @Injectable()
-export class UserService {
-  constructor(private readonly db: DbService) {}
+export class UserService extends UserSharedService {
+  constructor(private readonly db: DbService) {
+    super(db);
+  }
 
   async getUsers(): Promise<User[]> {
     const users = await this.db.user.findMany();
@@ -27,13 +24,10 @@ export class UserService {
 
   async createUser(dto: CreateUserDto): Promise<User> {
     try {
-      const hashedPass = await this.hashPassword(dto.password);
-      const user = await this.db.user.create({
-        data: { ...dto, password: hashedPass, version: 1 },
-      });
+      const user = await this.addUser(dto);
       return user ? new User(user) : null;
-    } catch {
-      throw new ConflictError();
+    } catch (err) {
+      throw err;
     }
   }
 
@@ -74,16 +68,5 @@ export class UserService {
     if (!user) {
       throw new NotFoundError();
     }
-  }
-
-  private async checkPasswordMatch(
-    savedPassword: string,
-    inputPassword: string,
-  ): Promise<boolean> {
-    return await compare(inputPassword, savedPassword);
-  }
-
-  private async hashPassword(password: string): Promise<string> {
-    return await hash(password, SALT_ROUNDS);
   }
 }

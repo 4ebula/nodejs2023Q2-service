@@ -20,3 +20,9 @@ export class NotFoundError extends Error {
     super();
   }
 }
+
+export class InvalidCredentialsError extends Error {
+  constructor() {
+    super();
+  }
+}

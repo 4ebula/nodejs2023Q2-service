@@ -6,6 +6,7 @@ import {
 import {
   ConflictError,
   ForbiddenError,
+  InvalidCredentialsError,
   Messages,
   NotFoundError,
 } from '../models';
@@ -22,6 +23,10 @@ export abstract class ErrorService {
 
     if (err instanceof ForbiddenError) {
       throw new ForbiddenException(err.message);
+    }
+
+    if (err instanceof InvalidCredentialsError) {
+      throw new ForbiddenException('User with such credentials does not exist');
     }
   }
 }
