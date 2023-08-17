@@ -23,7 +23,7 @@ Create .env based on .env.example (or copy .env.example and rename it to .env)
 ## Running application
 
 ```
-npm docker:start
+npm run docker:start
 ```
 
 After starting the app on port (declared in .env file or 4000 as default) you can open
