@@ -12,12 +12,13 @@ export class AuthService extends UserSharedService {
     super(db);
   }
 
-  async createUser(dto: CreateUserDto): Promise<void> {
+  async createUser(dto: CreateUserDto): Promise<string> {
     try {
       const hashedPass = await this.hashPassword(dto.password);
-      await this.db.user.create({
+      const user = await this.db.user.create({
         data: { ...dto, password: hashedPass, version: 1 },
       });
+      return user.id;
     } catch {
       throw new ConflictError();
     }
@@ -31,16 +32,15 @@ export class AuthService extends UserSharedService {
     }
 
     const isPassMatch = await this.checkPasswordMatch(user.password, password);
-    console.log('pass equality', isPassMatch);
     if (!isPassMatch) {
       throw new InvalidCredentialsError();
     }
 
-    const access_token = await this.jwtService.signAsync({
+    const accessToken = await this.jwtService.signAsync({
       sub: user.id,
       login: user.login,
     });
 
-    return { access_token };
+    return { accessToken };
   }
 }

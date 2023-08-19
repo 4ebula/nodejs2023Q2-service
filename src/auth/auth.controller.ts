@@ -4,6 +4,7 @@ import { ErrorService } from 'src/shared/services';
 import { CreateUserDto } from 'src/user/models';
 import { AuthService } from './auth.service';
 import { LoginResponse } from './models';
+import { SkipAuth } from './decorators/auth.decorator';
 
 @Controller('auth')
 export class AuthController extends ErrorService {
@@ -12,10 +13,14 @@ export class AuthController extends ErrorService {
   }
 
   @Post('signup')
-  async createUser(@Body() dto: CreateUserDto): Promise<string> {
+  @SkipAuth()
+  async createUser(@Body() dto: CreateUserDto): Promise<{ id: string }> {
+    console.log('Signup');
     try {
-      await this.authService.createUser(dto);
-      return 'Successfully created';
+      const id = await this.authService.createUser(dto);
+      // return 'Successfully created';
+      console.log(id);
+      return { id };
     } catch (err) {
       if (err instanceof ConflictError) {
         this.throwExceptions('User', err);
@@ -24,6 +29,7 @@ export class AuthController extends ErrorService {
   }
 
   @Post('login')
+  @SkipAuth()
   @HttpCode(200)
   async login(@Body() dto: CreateUserDto): Promise<LoginResponse> {
     try {
