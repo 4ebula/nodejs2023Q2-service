@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DbService } from 'src/db';
-import { ConflictError, InvalidCredentialsError } from 'src/shared/models';
+import {
+  AuthorizationError,
+  ConflictError,
+  InvalidCredentialsError,
+  NotFoundError,
+} from 'src/shared/models';
 import { UserSharedService } from 'src/shared/services';
 import { CreateUserDto } from 'src/user/models';
-import { LoginResponse } from './models';
+import { LoginResponse, RefreshDto } from './models';
 
 @Injectable()
 export class AuthService extends UserSharedService {
@@ -36,11 +41,49 @@ export class AuthService extends UserSharedService {
       throw new InvalidCredentialsError();
     }
 
+    const { id, login: userLogin } = user;
+    return await this.createTokens(id, userLogin);
+  }
+
+  async refresh({ refreshToken }: RefreshDto): Promise<LoginResponse> {
+    try {
+      const refreshData = await this.jwtService.verifyAsync(refreshToken, {
+        secret: process.env.JWT_SECRET_REFRESH_KEY,
+      });
+      const { sub: id, login } = refreshData;
+
+      const user = await this.db.user.findUnique({ where: { id } });
+
+      if (user) {
+        return await this.createTokens(id, login);
+      } else {
+        throw new NotFoundError();
+      }
+    } catch (err) {
+      throw new AuthorizationError(err.message);
+    }
+  }
+
+  private async createTokens(
+    id: string,
+    login: string,
+  ): Promise<LoginResponse> {
     const accessToken = await this.jwtService.signAsync({
-      sub: user.id,
-      login: user.login,
+      sub: id,
+      login: login,
     });
 
-    return { accessToken };
+    const refreshToken = await this.jwtService.signAsync(
+      {
+        sub: id,
+        login: login,
+      },
+      {
+        expiresIn: process.env.TOKEN_REFRESH_EXPIRE_TIME,
+        secret: process.env.JWT_SECRET_REFRESH_KEY,
+      },
+    );
+
+    return { accessToken, refreshToken };
   }
 }

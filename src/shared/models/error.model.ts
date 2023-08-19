@@ -26,3 +26,9 @@ export class InvalidCredentialsError extends Error {
     super();
   }
 }
+
+export class AuthorizationError extends Error {
+  constructor(public message: string) {
+    super();
+  }
+}

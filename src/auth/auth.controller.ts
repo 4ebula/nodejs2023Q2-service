@@ -1,9 +1,8 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
-import { ConflictError } from 'src/shared/models';
 import { ErrorService } from 'src/shared/services';
 import { CreateUserDto } from 'src/user/models';
 import { AuthService } from './auth.service';
-import { LoginResponse } from './models';
+import { LoginResponse, RefreshDto } from './models';
 import { SkipAuth } from './decorators/auth.decorator';
 
 @Controller('auth')
@@ -15,16 +14,11 @@ export class AuthController extends ErrorService {
   @Post('signup')
   @SkipAuth()
   async createUser(@Body() dto: CreateUserDto): Promise<{ id: string }> {
-    console.log('Signup');
     try {
       const id = await this.authService.createUser(dto);
-      // return 'Successfully created';
-      console.log(id);
       return { id };
     } catch (err) {
-      if (err instanceof ConflictError) {
-        this.throwExceptions('User', err);
-      }
+      this.throwExceptions('User', err);
     }
   }
 
@@ -40,5 +34,12 @@ export class AuthController extends ErrorService {
   }
 
   @Post('refresh')
-  async refresh() {}
+  @SkipAuth()
+  async refresh(@Body() dto: RefreshDto): Promise<LoginResponse> {
+    try {
+      return await this.authService.refresh(dto);
+    } catch (err) {
+      this.throwExceptions('User', err);
+    }
+  }
 }
