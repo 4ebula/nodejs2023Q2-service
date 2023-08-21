@@ -37,14 +37,10 @@ You can see available endpoint on http://localhost:{port}/doc/
 
 After application running open new terminal and enter:
 
-To run all tests without authorization
+To run all tests with authorization
 
 ```
-npm run test
+npm run test:auth
 ```
 
-To run only one of all test suites
-
-```
-npm run test -- <path to suite>
-```
+If tests auth tests are failing, try to remove all users from db and then run them again.

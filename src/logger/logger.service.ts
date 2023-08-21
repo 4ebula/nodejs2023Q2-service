@@ -27,7 +27,6 @@ export class LoggerService extends Logger {
     super();
     const logLevel = parseInt(process.env.LOG_LEVEL);
     this.logLevel = Number.isNaN(logLevel) ? 0 : logLevel;
-    console.log(this.logLevel);
     this.checkFolderExistance();
   }
 
