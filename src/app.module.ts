@@ -10,9 +10,11 @@ import { TrackModule } from './track/track.module';
 import { FavModule } from './favs/fav.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthGuard } from './auth/guards/auth.guard';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { LoggerModule } from './logger/logger.module';
 import { LoggerMiddleware } from './logger/logger.middleware';
+import { CustomExceptionsFilter } from './shared/services/exception-filter';
+import { LoggerService } from './logger/logger.service';
 
 @Module({
   imports: [
@@ -27,9 +29,28 @@ import { LoggerMiddleware } from './logger/logger.middleware';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: AuthGuard },
+    {
+      provide: APP_FILTER,
+      useClass: CustomExceptionsFilter,
+    },
+  ],
 })
 export class AppModule {
+  constructor(private logger: LoggerService) {
+    process.on('unhandledRejection', (reason, promise) => {
+      this.logger.error(
+        `Unhandled Rejection at: ${promise}, reason: ${reason}`,
+      );
+    });
+
+    process.on('uncaughtException', (error, origin) => {
+      this.logger.error(`Caught exception: ${error}, Origin: ${origin}`);
+    });
+  }
+
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(LoggerMiddleware).forRoutes('*');
   }

@@ -1,1 +1,0 @@
-/auth/login	POST	{}	{"login":"test","password":"test"}	200
