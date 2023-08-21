@@ -23,7 +23,7 @@ Create .env based on .env.example (or copy .env.example and rename it to .env)
 ## Running application
 
 ```
-npm docker:start
+npm run docker:start
 ```
 
 After starting the app on port (declared in .env file or 4000 as default) you can open
@@ -37,14 +37,10 @@ You can see available endpoint on http://localhost:{port}/doc/
 
 After application running open new terminal and enter:
 
-To run all tests without authorization
+To run all tests with authorization
 
 ```
-npm run test
+npm run test:auth
 ```
 
-To run only one of all test suites
-
-```
-npm run test -- <path to suite>
-```
+If tests auth tests are failing, try to remove all users from db and then run them again.
